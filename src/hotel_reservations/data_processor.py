@@ -1,7 +1,5 @@
 """Data preprocessing module."""
 
-import datetime
-
 import pandas as pd
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, to_utc_timestamp
@@ -29,10 +27,8 @@ class DataProcessor:
         self.df["arrival_year"] = pd.to_numeric(self.df["arrival_year"], errors="coerce")
 
         self.df["arrival_datetime"] = pd.to_datetime(
-            { "year" : self.df["arrival_year"],
-               "month" : self.df["arrival_month"],
-               "day" : self.df["arrival_date"] } ,
-            errors="coerce"
+            {"year": self.df["arrival_year"], "month": self.df["arrival_month"], "day": self.df["arrival_date"]},
+            errors="coerce",
         )
 
         # Drop original date columns
