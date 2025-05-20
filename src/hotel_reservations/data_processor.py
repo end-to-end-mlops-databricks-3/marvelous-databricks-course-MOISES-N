@@ -29,9 +29,9 @@ class DataProcessor:
         self.df["arrival_year"] = pd.to_numeric(self.df["arrival_year"], errors="coerce")
 
         self.df["arrival_datetime"] = pd.to_datetime(
-            dict(year=self.df["arrival_year"],
-                 month=self.df["arrival_month"],
-                 day=self.df["arrival_date"]),
+            { "year" :self.df["arrival_year"],
+               "month" : self.df["arrival_month"],
+               "day" : self.df["arrival_date"]} 
             errors="coerce"
         )
 
