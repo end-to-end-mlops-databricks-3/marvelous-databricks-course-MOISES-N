@@ -1,16 +1,19 @@
 """Unit tests for BasicModel."""
 
+from unittest.mock import patch
+
 import mlflow
 import pandas as pd
 from conftest import CATALOG_DIR, TRACKING_URI
 from lightgbm import LGBMClassifier
 from loguru import logger
+from mlflow import log_input
+from mlflow.data import from_spark
 from mlflow.entities.model_registry.registered_model import RegisteredModel
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from unittest.mock import patch
 
 from hotel_reservations.config import ProjectConfig, Tags
 from hotel_reservations.models.basic_model import BasicModel
@@ -102,14 +105,17 @@ def test_train(mock_basic_model: BasicModel) -> None:
     assert mock_basic_model.pipeline.n_features_in_ == len(expected_feature_names)
     assert sorted(expected_feature_names) == sorted(mock_basic_model.pipeline.feature_names_in_)
 
-@patch( 'hotel_reservations.models.basic_model.mlflow.data.from_spark')
-@patch( 'hotel_reservations.models.basic_model.mlflow.log_input')
-def test_log_model(mock_data_from_spark, mock_log_input, mock_basic_model: BasicModel) -> None:
+
+@patch("hotel_reservations.models.basic_model.mlflow.data.from_spark")
+@patch("hotel_reservations.models.basic_model.mlflow.log_input")
+def test_log_model(mock_data_from_spark: from_spark, mock_log_input: log_input, mock_basic_model: BasicModel) -> None:
     """Test model logging validation.
 
     Verifies that the model's pipeline captures correct feature dimensions and names,
     then checks proper dataset type handling during model logging.
 
+    :param mock_data_from_spark: Mocked mlflow.data.from_spark that originally pulls data from a delta table
+    :param log_input: Mocked mlflow.log_input that logs metadata from a delta table
     :param mock_basic_model: Mocked BasicModel instance for testing
     """
     mock_basic_model.load_data()
@@ -142,15 +148,20 @@ def test_log_model(mock_data_from_spark, mock_log_input, mock_basic_model: Basic
 
     assert model_uri
 
-@patch( 'hotel_reservations.models.basic_model.mlflow.data.from_spark')
-@patch( 'hotel_reservations.models.basic_model.mlflow.log_input')
-def test_register_model(mock_data_from_spark, mock_log_input, mock_basic_model: BasicModel) -> None:
+
+@patch("hotel_reservations.models.basic_model.mlflow.data.from_spark")
+@patch("hotel_reservations.models.basic_model.mlflow.log_input")
+def test_register_model(
+    mock_data_from_spark: from_spark, mock_log_input: log_input, mock_basic_model: BasicModel
+) -> None:
     """Test the registration of a basic MLflow model.
 
     This function performs several operations on the mock basic model, including loading data,
     preparing features, training, and logging the model. It then registers the model and verifies
     its existence in the MLflow model registry.
 
+    :param mock_data_from_spark: Mocked mlflow.data.from_spark that originally pulls data from a delta table
+    :param log_input: Mocked mlflow.log_input that logs metadata from a delta table
     :param mock_basic_model: A mocked instance of the BasicModel class.
     """
     mock_basic_model.load_data()
@@ -182,14 +193,18 @@ def test_register_model(mock_data_from_spark, mock_log_input, mock_basic_model: 
     assert alias == "latest-model"
 
 
-@patch( 'hotel_reservations.models.basic_model.mlflow.data.from_spark')
-@patch( 'hotel_reservations.models.basic_model.mlflow.log_input')
-def test_retrieve_current_run_metadata(mock_data_from_spark, mock_log_input, mock_basic_model: BasicModel) -> None:
+@patch("hotel_reservations.models.basic_model.mlflow.data.from_spark")
+@patch("hotel_reservations.models.basic_model.mlflow.log_input")
+def test_retrieve_current_run_metadata(
+    mock_data_from_spark: from_spark, mock_log_input: log_input, mock_basic_model: BasicModel
+) -> None:
     """Test retrieving the current run metadata from a mock basic model.
 
     This function verifies that the `retrieve_current_run_metadata` method
     of the `BasicModel` class returns metrics and parameters as dictionaries.
 
+    :param mock_data_from_spark: Mocked mlflow.data.from_spark that originally pulls data from a delta table
+    :param log_input: Mocked mlflow.log_input that logs metadata from a delta table
     :param mock_basic_model: A mocked instance of the BasicModel class.
     """
     mock_basic_model.load_data()
@@ -207,9 +222,11 @@ def test_retrieve_current_run_metadata(mock_data_from_spark, mock_log_input, moc
     assert params
 
 
-@patch( 'hotel_reservations.models.basic_model.mlflow.data.from_spark')
-@patch( 'hotel_reservations.models.basic_model.mlflow.log_input')
-def test_load_latest_model_and_predict(mock_data_from_spark, mock_log_input, mock_basic_model: BasicModel) -> None:
+@patch("hotel_reservations.models.basic_model.mlflow.data.from_spark")
+@patch("hotel_reservations.models.basic_model.mlflow.log_input")
+def test_load_latest_model_and_predict(
+    mock_data_from_spark: from_spark, mock_log_input: log_input, mock_basic_model: BasicModel
+) -> None:
     """Test the process of loading the latest model and making predictions.
 
     This function performs the following steps:
@@ -218,6 +235,8 @@ def test_load_latest_model_and_predict(mock_data_from_spark, mock_log_input, moc
     - Logs and registers the trained model.
     - Extracts input data from the test set and makes predictions using the latest model.
 
+    :param mock_data_from_spark: Mocked mlflow.data.from_spark that originally pulls data from a delta table
+    :param log_input: Mocked mlflow.log_input that logs metadata from a delta table
     :param mock_basic_model: Instance of a basic machine learning model with methods for data
                               loading, feature preparation, training, logging, and prediction.
     """

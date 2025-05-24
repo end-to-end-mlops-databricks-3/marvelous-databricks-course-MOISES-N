@@ -1,16 +1,14 @@
 # Databricks notebook source
 
+import os
+
 import mlflow
+from dotenv import load_dotenv
+from marvelous.common import is_databricks
 from pyspark.sql import SparkSession
 
 from hotel_reservations.config import ProjectConfig, Tags
 from hotel_reservations.models.basic_model import BasicModel
-
-from dotenv import load_dotenv
-from marvelous.common import is_databricks
-
-import os
-
 
 # COMMAND ----------
 # If you have DEFAULT profile and are logged in with DEFAULT profile,
@@ -42,7 +40,7 @@ basic_model.log_model()
 
 # COMMAND ----------
 run_id = mlflow.search_runs(
-    experiment_names=[ config.experiment_name_basic ], filter_string="tags.branch='week2'"
+    experiment_names=[config.experiment_name_basic], filter_string="tags.branch='week2'"
 ).run_id[0]
 
 model = mlflow.sklearn.load_model(f"runs:/{run_id}/lightgbm-pipeline-model")

@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/iepvf/OneDrive/Documentos/DatabricksMLOps/marvelous-databricks-course-MOISES-N/tests/mlruns/455763250548290044/d1790ff201e3424394a923a8e4a60d64/artifacts
+end_time: 1748123127730
+entry_point_name: ''
+experiment_id: '455763250548290044'
+lifecycle_stage: active
+run_id: d1790ff201e3424394a923a8e4a60d64
+run_name: whimsical-hawk-700
+run_uuid: d1790ff201e3424394a923a8e4a60d64
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1748123122326
+status: 3
+tags: []
+user_id: iepvf

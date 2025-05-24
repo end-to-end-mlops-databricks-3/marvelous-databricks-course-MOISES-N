@@ -19,10 +19,10 @@ from mlflow.data.dataset_source import DatasetSource
 from mlflow.models import infer_signature
 from pyspark.sql import SparkSession
 from sklearn.compose import ColumnTransformer
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.impute import SimpleImputer
 
 from hotel_reservations.config import ProjectConfig, Tags
 
@@ -71,41 +71,42 @@ class BasicModel:
         self.y_test = self.test_set[self.target]
         logger.info("✅ Data successfully loaded.")
 
-
     def prepare_features(self) -> None:
         """Encode categorical features and define a preprocessing pipeline.
 
         Creates a ColumnTransformer for one-hot encoding categorical features while passing through numerical
         features. Constructs a pipeline combining preprocessing and LightGBM regression model.
         """
-        logger.info("🔄 Defining preprocessing pipeline...") 
-
+        logger.info("🔄 Defining preprocessing pipeline...")
 
         # Numeric pipeline
-        numeric_transformer = Pipeline(steps=[
-            ("imputer", SimpleImputer(strategy="mean")),
-            ("scaler", StandardScaler())
-        ])
+        numeric_transformer = Pipeline(
+            steps=[("imputer", SimpleImputer(strategy="mean")), ("scaler", StandardScaler())]
+        )
 
         # Categorical pipeline
-        categorical_transformer = Pipeline(steps=[
-            ("imputer", SimpleImputer(strategy="most_frequent")),
-            ("onehot", OneHotEncoder(handle_unknown="ignore"))
-        ])
+        categorical_transformer = Pipeline(
+            steps=[
+                ("imputer", SimpleImputer(strategy="most_frequent")),
+                ("onehot", OneHotEncoder(handle_unknown="ignore")),
+            ]
+        )
 
         # Combine transformers
-        self.preprocessor = ColumnTransformer(transformers=[
-            ("num", numeric_transformer, self.num_features ),
-            ("cat", categorical_transformer, self.cat_features)
-        ])
+        self.preprocessor = ColumnTransformer(
+            transformers=[
+                ("num", numeric_transformer, self.num_features),
+                ("cat", categorical_transformer, self.cat_features),
+            ]
+        )
 
-        #Pipeline
+        # Pipeline
         self.pipeline = Pipeline(
             steps=[("preprocessor", self.preprocessor), ("Classifier", LGBMClassifier(**self.parameters))]
         )
 
         logger.info("✅ Preprocessing pipeline defined.")
-        
+
     def train(self) -> None:
         """Train the model."""
         logger.info("🚀 Starting training...")
@@ -119,10 +120,9 @@ class BasicModel:
 
             y_pred = self.pipeline.predict(self.X_test)
 
-            precision = precision_score(self.y_test, y_pred, average='macro')
-            recall = recall_score(self.y_test, y_pred, average='macro')
-            f1 = f1_score(self.y_test, y_pred, average='macro')
-
+            precision = precision_score(self.y_test, y_pred, average="macro")
+            recall = recall_score(self.y_test, y_pred, average="macro")
+            f1 = f1_score(self.y_test, y_pred, average="macro")
 
             logger.info(f"📊 Precision: {precision}")
             logger.info(f"📊 Recall: {recall}")
@@ -134,7 +134,6 @@ class BasicModel:
             mlflow.log_metric("Precision", precision)
             mlflow.log_metric("Recall", recall)
             mlflow.log_metric("F1 Score Macro", f1)
-
 
             # Log the model
             signature = infer_signature(model_input=self.X_train, model_output=y_pred)

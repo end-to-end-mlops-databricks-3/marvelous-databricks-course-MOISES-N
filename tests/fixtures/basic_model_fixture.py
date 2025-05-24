@@ -101,11 +101,7 @@ def mock_basic_model(config: ProjectConfig, tags: Tags, spark_session: SparkSess
     :param spark_session: Spark session instance for testing environment
     :return: Configured BasicModel instance with mocked Spark interactions
     """
-    instance = BasicModel(
-        config=config,
-        tags=tags,
-        spark=spark_session    
-        )
+    instance = BasicModel(config=config, tags=tags, spark=spark_session)
 
     train_data = pd.read_csv((CATALOG_DIR / "train_set.csv").as_posix())
     # Important Note: Replace NaN with None in Pandas

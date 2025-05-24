@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/iepvf/OneDrive/Documentos/DatabricksMLOps/marvelous-databricks-course-MOISES-N/tests/mlruns/455763250548290044/dad6645b348a4591bc88da8c3554b64c/artifacts
+end_time: 1748123136912
+entry_point_name: ''
+experiment_id: '455763250548290044'
+lifecycle_stage: active
+run_id: dad6645b348a4591bc88da8c3554b64c
+run_name: ambitious-cub-572
+run_uuid: dad6645b348a4591bc88da8c3554b64c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1748123132361
+status: 3
+tags: []
+user_id: iepvf
