@@ -3,7 +3,6 @@
 import pandas as pd
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, to_utc_timestamp
-from sklearn.model_selection import train_test_split
 
 from hotel_reservations.config import ProjectConfig
 
@@ -20,22 +19,28 @@ class DataProcessor:
         self.spark = spark
 
     def preprocess(self) -> None:
-        """Preprocess the hotel reservations dataset."""
-        # Convert arrival fields to datetime
+        """Preprocess features."""
         self.df["arrival_date"] = pd.to_numeric(self.df["arrival_date"], errors="coerce")
         self.df["arrival_month"] = pd.to_numeric(self.df["arrival_month"], errors="coerce")
         self.df["arrival_year"] = pd.to_numeric(self.df["arrival_year"], errors="coerce")
 
+        # Create datetime from components
         self.df["arrival_datetime"] = pd.to_datetime(
             {"year": self.df["arrival_year"], "month": self.df["arrival_month"], "day": self.df["arrival_date"]},
             errors="coerce",
         )
 
+        # Extract datetime features
+        self.df["arrival_dayofweek"] = self.df["arrival_datetime"].dt.dayofweek
+        self.df["arrival_is_weekend"] = self.df["arrival_dayofweek"].isin([5, 6]).astype(int)
+        self.df["arrival_month_num"] = self.df["arrival_datetime"].dt.month  # Already had month, but reconfirm
+
         # Drop original date columns
         self.df.drop(columns=["arrival_year", "arrival_month", "arrival_date"], inplace=True)
 
         # Ensure numeric features are in the right type
-        num_features = self.config.num_features
+        num_features = self.config.num_features.copy()
+
         for col in num_features:
             self.df[col] = pd.to_numeric(self.df[col], errors="coerce")
 
@@ -54,14 +59,28 @@ class DataProcessor:
         self.df = self.df[relevant_columns]
         self.df["Booking_ID"] = self.df["Booking_ID"].astype("str")
 
-    def split_data(self, test_size: float = 0.2, random_state: int = 42) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Split the DataFrame (self.df) into training and test sets.
+        # self.df.drop(columns=["arrival_datetime"], inplace=True, errors="ignore")
 
-        :param test_size: The proportion of the dataset to include in the test split.
-        :param random_state: Controls the shuffling applied to the data before applying the split.
+    def split_data(self, test_size: float = 0.2) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Split the DataFrame (self.df) into training and test sets with a temporal split using arrival_datetime.
+
+        The training set comprises the oldest (1 - test_size) fraction of records, while the test
+        set consists of the most recent test_size fraction. This is ideal for time-dependent data to
+        prevent information leakage from the future.
+
+        :param test_size: The proportion of the dataset to use as the test set.
         :return: A tuple containing the training and test DataFrames.
         """
-        train_set, test_set = train_test_split(self.df, test_size=test_size, random_state=random_state)
+        # Sort the DataFrame by arrival_datetime
+        df_sorted = self.df.sort_values(by="arrival_datetime")
+
+        # Determine the split index. The training set is the earliest portion.
+        split_index = int(len(df_sorted) * (1 - test_size))
+
+        # Make temporal splits ensuring no overlap between train and test sets
+        train_set = df_sorted.iloc[:split_index].copy()
+        test_set = df_sorted.iloc[split_index:].copy()
+
         return train_set, test_set
 
     def save_to_catalog(self, train_set: pd.DataFrame, test_set: pd.DataFrame) -> None:
@@ -78,11 +97,11 @@ class DataProcessor:
             "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
         )
 
-        train_set_with_timestamp.write.mode("overwrite").saveAsTable(
+        train_set_with_timestamp.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable(
             f"{self.config.catalog_name}.{self.config.schema_name}.train_set"
         )
 
-        test_set_with_timestamp.write.mode("overwrite").saveAsTable(
+        test_set_with_timestamp.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable(
             f"{self.config.catalog_name}.{self.config.schema_name}.test_set"
         )
 

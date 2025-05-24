@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1748122096162
+current_stage: None
+description: null
+last_updated_timestamp: 1748122096162
+name: mlops_dev.iepvfeli.hotel_reservations_model_basic
+run_id: ad5c180615164afcb1eedc33823a9073
+run_link: null
+source: file:///C:/Users/iepvf/OneDrive/Documentos/DatabricksMLOps/marvelous-databricks-course-MOISES-N/tests/mlruns/797254848474174695/ad5c180615164afcb1eedc33823a9073/artifacts/lightgbm-pipeline-model
+status: READY
+status_message: null
+storage_location: file:///C:/Users/iepvf/OneDrive/Documentos/DatabricksMLOps/marvelous-databricks-course-MOISES-N/tests/mlruns/797254848474174695/ad5c180615164afcb1eedc33823a9073/artifacts/lightgbm-pipeline-model
+user_id: null
+version: 1

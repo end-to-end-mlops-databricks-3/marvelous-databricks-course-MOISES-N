@@ -8,13 +8,13 @@ dev:
   catalog_name: mlops_dev
   schema_name: iepvfeli
 
-experiment_name_basic: /Shared/hotel-reservations-basic
-experiment_name_custom: /Shared/hotel-reservations-custom
+experiment_name_basic: /Shared/iepv-hotel-reservations-basic
+experiment_name_custom: /Shared/iepv-hotel-reservations-custom
 
 parameters:
-  learning_rate: 0.01
-  n_estimators: 1000
-  max_depth: 6
+  n_estimators: 100
+  learning_rate: 0.1
+  class_weight: 'balanced'
 
 num_features:
   - no_of_adults
@@ -29,6 +29,9 @@ num_features:
   - no_of_previous_bookings_not_canceled
   - avg_price_per_room
   - no_of_special_requests
+  - arrival_dayofweek
+  - arrival_is_weekend
+  - arrival_month_num
 
 cat_features:
   - type_of_meal_plan

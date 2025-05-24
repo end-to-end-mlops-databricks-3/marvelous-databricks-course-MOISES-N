@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/iepvf/OneDrive/Documentos/DatabricksMLOps/marvelous-databricks-course-MOISES-N/tests/mlruns/797254848474174695/c5b524edf8d4464091f308ed454962f4/artifacts
+end_time: 1748122106093
+entry_point_name: ''
+experiment_id: '797254848474174695'
+lifecycle_stage: active
+run_id: c5b524edf8d4464091f308ed454962f4
+run_name: adorable-penguin-746
+run_uuid: c5b524edf8d4464091f308ed454962f4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1748122102016
+status: 3
+tags: []
+user_id: iepvf
